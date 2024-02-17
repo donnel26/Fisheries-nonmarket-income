@@ -47,7 +47,6 @@ drop if fishID==.
 gen t_sqr=t^2
 regress cr c.year##c.year i.siteID if fishID==2 //impute missing harvest rates data
 predict hrhat
-//replace hrhat=abs(hrhat)
 replace cr=hrhat if cr==.
 gen crt=t*cr
 gen crt_sqr=t_sqr*cr
