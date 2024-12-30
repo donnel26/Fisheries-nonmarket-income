@@ -52,5 +52,12 @@ Import import excel  "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\
 Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\Income2013.xlsx", sheet("Income2013") firstrow clear
 Do travel cost calcs. Add fees data. Adjust for share boat effort. Then do per year calculations and presumably save data.
 
+3. HarvestRates.do
+Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", sheet("Harvest Rate") firstrow clear 
+Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", sheet("Harvest") firstrow 
+Import import excel "C:\Users\donnel26\OneDrive - purdue.edu\Fisheries RUM\Angler Archive Data\Angler Archive Effort all years.xlsx", sheet("Effort") firstrow
+Import import excel "C:\Users\donnel26\OneDrive - purdue.edu\Fisheries RUM\ALLilininstreamseffort.xlsx", sheet("Sheet1") firstrow clear 
+merge m:m site using `Effort'... Generate  harvest rate with harvest and effort data by dividing harvest by effort. Replace with this if
+harvest rate data missing. Gen perchHarvestRate and troutsalmonHarvestRate per year.
 
 
