@@ -1,0 +1,25 @@
+From Angler Archive
+1. Site-specific annual fishing effort hours 2000-2013 for  four Indiana ports 
+(Burns Harbor, East Chicago, Hammond, and Michigan City), three Indiana streams that empty into 
+Lake Michigan (Little Calumet River, Salt Creek, and Trail Creek), and ten Illinois sites 
+(Belmont, Burnham, Calumet, Diversey Harbor, Jackson, McCormick, Montrose Harbor, North Point, 
+Waukegan Harbor, and Waukegan Powerplant).
+2. Catch rate (number of fish per angler hour) - used in RUM
+2. Annual average travel distance - used in RUM
+3. Share of boat anglers at each site
+
+American Automobile Association (AAA)
+1. Driving costs
+
+Census
+1. Median HH income
+2. Zip code population shares 2000 and 2010
+
+Lauber et al 2017
+1. Angler income
+
+National Survey of Fishing, Hunting and Wildlife-Associated Recreation 2016
+1. Share urban/rural
+
+All years data for models.do
+I replace AllIN effort
