@@ -1,15 +1,14 @@
-**2000: travel cost=2*((0.2294*distance) + (timevalue*drivingtime))
-**2010: travel cost=2*((0.2542*distance) + (timevalue*drivingtime))
-
 *******************************
 ************2000***************
 *******************************
+*** First I import zip to site distances data 
 clear
 import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", sheet("distances") firstrow
 destring, replace
 tempfile distances
 save `distances'
 
+** Then I merge it with the 1999 income data. I convert time from minutes to hours. I save this for calculations.
 clear
 import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\Income1999.xlsx", sheet("Income1999") firstrow
 destring, replace
@@ -22,9 +21,9 @@ rename Idsite siteid
 tempfile income1999
 save `income1999'
 
+*** Then I do the same with the 2011 data
 clear
 import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", sheet("distances") firstrow
-
 destring, replace
 tempfile distances
 save `distances'
@@ -41,6 +40,8 @@ gen timehours=timemins/60
 ** mean(medhhincome)== 53277.87
 drop if medhhincome2011==0
 rename Idsite siteid
+
+** Then I merge this data with the 1999 data
 merge 1:1 siteid zip using `income1999', keep(match)
 drop _merge
 replace distmiles=0 if siteid==99
@@ -59,11 +60,10 @@ gen medhhincome2008 = medhhincome1999 + 9 * (medhhincome2011 - medhhincome1999) 
 gen medhhincome2009 = medhhincome1999 + 10 * (medhhincome2011 - medhhincome1999) / 12
 gen medhhincome2010 = medhhincome1999 + 11 * (medhhincome2011 - medhhincome1999) / 12
 
-**adjust to 2023$**
-
 tempfile medhhincome
 save `medhhincome'
 
+** Next I bring in the 2012 and 2013 income data and merge it to all the other data. So now I've got all income data together.
 clear
 import excel  "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\Income2012.xlsx", sheet("income2012") firstrow clear
 merge m:m zip using `medhhincome', keep(match)
@@ -77,127 +77,115 @@ merge m:m zip using `medhhincome2012', keep(match)
 drop _merge
 drop if zip==.
 
-replace medhhincome1999=medhhincome1999*1.42
-replace medhhincome2000=medhhincome2000*1.42
-replace medhhincome2001=medhhincome2001*1.42
-replace medhhincome2002=medhhincome2002*1.42
-replace medhhincome2003=medhhincome2003*1.42
-replace medhhincome2004=medhhincome2004*1.42
-replace medhhincome2005=medhhincome2005*1.42
-replace medhhincome2006=medhhincome2006*1.42
-replace medhhincome2007=medhhincome2007*1.42
-replace medhhincome2008=medhhincome2008*1.42
-replace medhhincome2009=medhhincome2009*1.42
-replace medhhincome2010=medhhincome2010*1.42
-replace medhhincome2011=medhhincome2011*1.42
-replace medhhincome2012=medhhincome2012*1.42
-replace medhhincome2013=medhhincome2013*1.42
+** Here I adjust for higher angler incomes.
+// Define the starting year and the ending year
+local start_year 1999
+local end_year 2013
+forvalues year = `start_year'/`end_year' {
+    replace medhhincome`year' = medhhincome`year' * 1.42
+}
+
+* Then I generate time value
+// Define the starting year and the ending year
+local start_year 2000
+local end_year 2013
+forvalues year = `start_year'/`end_year' {
+    gen timevalue`year' = (medhhincome`year' / 2080) * 0.5
+}
 
 
-gen timevalue2000 = (medhhincome2000 / 2080) * 0.5
-gen timevalue2001 = (medhhincome2001 / 2080) * 0.5
-gen timevalue2002 = (medhhincome2002 / 2080) * 0.5
-gen timevalue2003 = (medhhincome2003 / 2080) * 0.5
-gen timevalue2004 = (medhhincome2004 / 2080) * 0.5
-gen timevalue2005 = (medhhincome2005 / 2080) * 0.5
-gen timevalue2006 = (medhhincome2006 / 2080) * 0.5
-gen timevalue2007 = (medhhincome2007 / 2080) * 0.5
-gen timevalue2008 = (medhhincome2008 / 2080) * 0.5
-gen timevalue2009 = (medhhincome2009 / 2080) * 0.5
-gen timevalue2010 = (medhhincome2010 / 2080) * 0.5
-gen timevalue2011 = (medhhincome2011 / 2080) * 0.5
-gen timevalue2012 = (medhhincome2012 / 2080) * 0.5
-gen timevalue2013 = (medhhincome2013 / 2080) * 0.5
+// Define AAA driving costs for each year 
+gen drivingcosts2000 = 0.2294
+gen drivingcosts2001 = 0.2388
+gen drivingcosts2002 = 0.259
+gen drivingcosts2003 = 0.2776
+gen drivingcosts2004 = 0.382
+gen drivingcosts2005 = 0.387
+gen drivingcosts2006 = 0.398
+gen drivingcosts2007 = 0.392
+gen drivingcosts2008 = 0.3153
+gen drivingcosts2009 = 0.2386
+gen drivingcosts2010 = 0.2542
+gen drivingcosts2011 = 0.2716
+gen drivingcosts2012 = 0.289
+gen drivingcosts2013 = 0.3
 
-gen travelcost2000 = 2 * ((0.2294 * distmiles) + (timevalue2000 * timehours))
-gen travelcost2001 = 2 * ((0.2388 * distmiles) + (timevalue2001 * timehours))
-gen travelcost2002 = 2 * ((0.259 * distmiles) + (timevalue2002 * timehours))
-gen travelcost2003 = 2 * ((0.2776 * distmiles) + (timevalue2003 * timehours))
-gen travelcost2004 = 2 * ((0.382 * distmiles) + (timevalue2004 * timehours))
-gen travelcost2005 = 2 * ((0.387 * distmiles) + (timevalue2005 * timehours))
-gen travelcost2006 = 2 * ((0.398 * distmiles) + (timevalue2006 * timehours))
-gen travelcost2007 = 2 * ((0.392 * distmiles) + (timevalue2007 * timehours))
-gen travelcost2008 = 2 * ((0.3153 * distmiles) + (timevalue2008 * timehours))
-gen travelcost2009 = 2 * ((0.2386 * distmiles) + (timevalue2009 * timehours))
-gen travelcost2010 = 2 * ((0.2542 * distmiles) + (timevalue2010 * timehours))
-gen travelcost2011 = 2 * ((0.2716 * distmiles) + (timevalue2011 * timehours))
-gen travelcost2012 = 2 * ((0.289 * distmiles) + (timevalue2012 * timehours))
-gen travelcost2013 = 2 * ((0.3 * distmiles) + (timevalue2013 * timehours))
+// Calculate travel costs using the driving costs variable
+gen travelcost2000 = 2 * ((drivingcosts2000 * distmiles) + (timevalue2000 * timehours))
+gen travelcost2001 = 2 * ((drivingcosts2001 * distmiles) + (timevalue2001 * timehours))
+gen travelcost2002 = 2 * ((drivingcosts2002 * distmiles) + (timevalue2002 * timehours))
+gen travelcost2003 = 2 * ((drivingcosts2003 * distmiles) + (timevalue2003 * timehours))
+gen travelcost2004 = 2 * ((drivingcosts2004 * distmiles) + (timevalue2004 * timehours))
+gen travelcost2005 = 2 * ((drivingcosts2005 * distmiles) + (timevalue2005 * timehours))
+gen travelcost2006 = 2 * ((drivingcosts2006 * distmiles) + (timevalue2006 * timehours))
+gen travelcost2007 = 2 * ((drivingcosts2007 * distmiles) + (timevalue2007 * timehours))
+gen travelcost2008 = 2 * ((drivingcosts2008 * distmiles) + (timevalue2008 * timehours))
+gen travelcost2009 = 2 * ((drivingcosts2009 * distmiles) + (timevalue2009 * timehours))
+gen travelcost2010 = 2 * ((drivingcosts2010 * distmiles) + (timevalue2010 * timehours))
+gen travelcost2011 = 2 * ((drivingcosts2011 * distmiles) + (timevalue2011 * timehours))
+gen travelcost2012 = 2 * ((drivingcosts2012 * distmiles) + (timevalue2012 * timehours))
+gen travelcost2013 = 2 * ((drivingcosts2013 * distmiles) + (timevalue2013 * timehours))
 
 sort siteid numberzone
+// Define the starting year and the ending year
+local start_year 2000
+local end_year 2013
 
-replace travelcost2000 = 0 if siteid == 99
-replace travelcost2001 = 0 if siteid == 99
-replace travelcost2002 = 0 if siteid == 99
-replace travelcost2003 = 0 if siteid == 99
-replace travelcost2004 = 0 if siteid == 99
-replace travelcost2005 = 0 if siteid == 99
-replace travelcost2006 = 0 if siteid == 99
-replace travelcost2007 = 0 if siteid == 99
-replace travelcost2008 = 0 if siteid == 99
-replace travelcost2009 = 0 if siteid == 99
-replace travelcost2010 = 0 if siteid == 99
-replace travelcost2011 = 0 if siteid == 99
-replace travelcost2012 = 0 if siteid == 99
-replace travelcost2013 = 0 if siteid == 99
+// Loop through the years and set travel costs to 0 for siteid == 99
+forvalues year = `start_year'/`end_year' {
+    replace travelcost`year' = 0 if siteid == 99
+}
 
 replace distmiles=0 if siteid == 99
+// Define the starting year and ending year
+local start_year 2000
+local end_year 2013
 
-mean(travelcost2000) if siteid != 99 & siteid != 15
-mean(travelcost2001) if siteid != 99 & siteid != 15
-mean(travelcost2002) if siteid != 99 & siteid != 15
-mean(travelcost2003) if siteid != 99 & siteid != 15
-mean(travelcost2004) if siteid != 99 & siteid != 15
-mean(travelcost2005) if siteid != 99 & siteid != 15
-mean(travelcost2006) if siteid != 99 & siteid != 15
-mean(travelcost2007) if siteid != 99 & siteid != 15
-mean(travelcost2008) if siteid != 99 & siteid != 15
-mean(travelcost2009) if siteid != 99 & siteid != 15
-mean(travelcost2010) if siteid != 99 & siteid != 15
-mean(travelcost2011) if siteid != 99 & siteid != 15
-mean(travelcost2012) if siteid != 99 & siteid != 15
-mean(travelcost2013) if siteid != 99 & siteid != 15
-
-replace travelcost2000=  168.5077 if siteid==15
-replace travelcost2001= 173.5946  if siteid==15
-replace travelcost2002=  182.6317 if siteid==15
-replace travelcost2003= 191.0836 if siteid==15
-replace travelcost2004= 230.9173 if siteid==15
-replace travelcost2005= 234.3949  if siteid==15
-replace travelcost2006= 240.067 if siteid==15
-replace travelcost2007= 239.5213  if siteid==15
-replace travelcost2008= 213.1165 if siteid==15
-replace travelcost2009= 186.7118 if siteid==15
-replace travelcost2010= 194.0664 if siteid==15
-replace travelcost2011= 202.0793 if siteid==15
-replace travelcost2012= 208.8689 if siteid==15
-replace travelcost2013= 212.7614 if siteid==15
+// Loop to calculate means and store in a local macro
+forvalues year = `start_year'/`end_year' {
+    // Calculate mean for the current year excluding siteid 99 and 15
+    quietly summarize travelcost`year' if siteid != 99 & siteid != 15
+    local mean_value = r(mean)
+    
+    // Replace travelcost for siteid == 15 with the mean value
+    replace travelcost`year' = `mean_value' if siteid == 15
+}
 
 **adjust travel costs all to 2023**
-replace travelcost2000= travelcost2000*(282.656/168.3083333)
-replace travelcost2001= travelcost2001*(282.656/174.9)
-replace travelcost2002= travelcost2002*(282.656/178.3)
-replace travelcost2003= travelcost2003*(282.656/172.8)
-replace travelcost2004= travelcost2004*(282.656/182.63)
-replace travelcost2005= travelcost2005*(282.656/188.43)
-replace travelcost2006= travelcost2006*(282.656/192.97)
-replace travelcost2007= travelcost2007*(282.656/198.12)
-replace travelcost2008= travelcost2008*(282.656/205.38)
-replace travelcost2009= travelcost2009*(282.656/204.06)
-replace travelcost2010= travelcost2010*(282.656/208.05)
-replace travelcost2011= travelcost2011*(282.656/214.74)
-replace travelcost2012= travelcost2012*(282.656/219.10)
-replace travelcost2013= travelcost2013*(282.656/222.17)
+// Define CPI for each year
+gen cpi2000 = 168.3083333
+gen cpi2001 = 174.9
+gen cpi2002 = 178.3
+gen cpi2003 = 172.8
+gen cpi2004 = 182.63
+gen cpi2005 = 188.43
+gen cpi2006 = 192.97
+gen cpi2007 = 198.12
+gen cpi2008 = 205.38
+gen cpi2009 = 204.06
+gen cpi2010 = 208.05
+gen cpi2011 = 214.74
+gen cpi2012 = 219.10
+gen cpi2013 = 222.17
+gen cpi2023 = 282.656 
+
+// Adjust travel costs based on CPI
+forvalues year = 2000/2013 {
+    local cpi_value = cpi`year' // Store CPI value for the year
+    replace travelcost`year' = travelcost`year' * (cpi2023 / `cpi_value')
+}
+
+// Calculate the mean of distmiles excluding siteid 99 and 15
+summarize distmiles if siteid != 99 & siteid != 15
+local mean_distmiles = r(mean)
+// Replace distmiles for siteid 15 with the calculated mean
+replace distmiles = `mean_distmiles' if siteid == 15
 
 
-mean(distmiles) if siteid != 99 & siteid != 15
-replace distmiles=  182.8783 if siteid==15
-
-drop timemins timehours timevalue2000 timevalue2001 timevalue2002 timevalue2003 timevalue2004 timevalue2005 timevalue2006 timevalue2007 timevalue2008 timevalue2010 timevalue2009 timevalue2010 timevalue2011 timevalue2012 timevalue2013
+drop timemins timehours timevalue2000 timevalue2001 timevalue2002 timevalue2003 timevalue2004 timevalue2005 timevalue2006 timevalue2007 timevalue2008 timevalue2010 timevalue2009 timevalue2010 timevalue2011 timevalue2012 timevalue2013 cpi2000 cpi2001 cpi2002 cpi2003 cpi2004 cpi2005 cpi2006 cpi2007 cpi2008 cpi2009 cpi2010 cpi2011 cpi2012 cpi2013 cpi2023 drivingcosts2000 drivingcosts2001 drivingcosts2002 drivingcosts2003 drivingcosts2004 drivingcosts2005 drivingcosts2006 drivingcosts2007 drivingcosts2008 drivingcosts2009 drivingcosts2010 drivingcosts2011 drivingcosts2012 drivingcosts2013
 
 tempfile TC
 save `TC'
-
 
 clear
 import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", sheet("fees") firstrow
@@ -225,253 +213,46 @@ replace sitestate=2 if sitestate==.
 replace sitestate=0 if siteid==99
 
 //replace Other with mean for Belmont, McCormick, and Waukegan
-*egen mean_parking = mean(parking) if siteid == 5 | siteid == 10 | siteid == 14
-*egen mean_license_nonres = mean(daylicense_nonres) if siteid == 5 | siteid == 10 | siteid == 14
-*egen mean_launch = mean(launch) if siteid == 5 | siteid == 10 | siteid == 14
-replace parking=10.83333 if siteid==15
-replace daylicense_nonres=10.5 if siteid==15
-replace launch=19.33333 if siteid==15
-*drop mean_parking mean_license_nonres mean_launch
+// Calculate means for specified site IDs
+egen mean_parking = mean(parking) if siteid == 5 | siteid == 10 | siteid == 14
+egen mean_license_nonres = mean(daylicense_nonres) if siteid == 5 | siteid == 10 | siteid == 14
+egen mean_launch = mean(launch) if siteid == 5 | siteid == 10 | siteid == 14
 
+// Replace values for siteid == 15 using the calculated means
+replace parking = mean_parking if siteid == 15
+replace daylicense_nonres = mean_license_nonres if siteid == 15
+replace launch = mean_launch if siteid == 15
+
+// Clean up by dropping the mean variables
+drop mean_parking mean_license_nonres mean_launch
+ 
 //share boat effort
-gen launch_2000= launch*boateffort_share2000
-gen launch_2001= launch*boateffort_share2001
-gen launch_2002= launch*boateffort_share2002
-gen launch_2003= launch*boateffort_share2003
-gen launch_2004= launch*boateffort_share2004
-gen launch_2005= launch*boateffort_share2005
-gen launch_2006= launch*boateffort_share2006
-gen launch_2007= launch*boateffort_share2007
-gen launch_2008= launch*boateffort_share2008
-gen launch_2009= launch*boateffort_share2009
-gen launch_2010= launch*boateffort_share2010
-gen launch_2011= launch*boateffort_share2011
-gen launch_2012= launch*boateffort_share2012
-gen launch_2013= launch*boateffort_share2013
-replace launch_2000=0 if launch_2000==.
-replace launch_2001=0 if launch_2001==.
-replace launch_2002=0 if launch_2002==.
-replace launch_2003=0 if launch_2003==.
-replace launch_2004=0 if launch_2004==.
-replace launch_2005=0 if launch_2005==.
-replace launch_2006=0 if launch_2006==.
-replace launch_2007=0 if launch_2007==.
-replace launch_2008=0 if launch_2008==.
-replace launch_2009=0 if launch_2009==.
-replace launch_2010=0 if launch_2010==.
-replace launch_2011=0 if launch_2011==.
-replace launch_2012=0 if launch_2012==.
-replace launch_2013=0 if launch_2013==.
+// Share boat effort for years 2000 to 2013
+forvalues year = 2000/2013 {
+    // Generate the launch variable for each year
+    gen launch_`year' = launch * boateffort_share`year'
+    
+    // Replace missing values with 0
+    replace launch_`year' = 0 if launch_`year' == .
+}
 
-******************
-******2000********
-******************
-//From IL zone to IL site
-gen TC2000=(travelcost2000+launch_2000+parking) if zipstate==2 & sitestate==2
-//From not IL zone to IL site
-replace TC2000=(travelcost2000+launch_2000+parking+daylicense_nonres) if zipstate!=2 & sitestate==2
 
-//From IN zone to IN site
-replace TC2000=(travelcost2000+launch_2000+parking) if zipstate==1 & sitestate==1
-//From not IN zone to IN site
-replace TC2000=(travelcost2000+launch_2000+parking+daylicense_nonres) if zipstate!=1 & sitestate==1
-
-replace TC2000=0 if siteid==99
-
-******************
-******2001********
-******************
-//From IL zone to IL site
-gen TC2001=(travelcost2001+launch_2001+parking) if zipstate==2 & sitestate==2
-//From not IL zone to IL site
-replace TC2001=(travelcost2001+launch_2001+parking+daylicense_nonres) if zipstate!=2 & sitestate==2
-
-//From IN zone to IN site
-replace TC2001=(travelcost2001+launch_2001+parking) if zipstate==1 & sitestate==1
-//From not IN zone to IN site
-replace TC2001=(travelcost2001+launch_2001+parking+daylicense_nonres) if zipstate!=1 & sitestate==1
-
-replace TC2001=0 if siteid==99
-
-******************
-******2002********
-******************
-//From IL zone to IL site
-gen TC2002=(travelcost2002+launch_2002+parking) if zipstate==2 & sitestate==2
-//From not IL zone to IL site
-replace TC2002=(travelcost2002+launch_2002+parking+daylicense_nonres) if zipstate!=2 & sitestate==2
-
-//From IN zone to IN site
-replace TC2002=(travelcost2002+launch_2002+parking) if zipstate==1 & sitestate==1
-//From not IN zone to IN site
-replace TC2002=(travelcost2002+launch_2002+parking+daylicense_nonres) if zipstate!=1 & sitestate==1
-
-replace TC2002=0 if siteid==99
-
-******************
-******2003********
-******************
-// From IL zone to IL site
-gen TC2003 = (travelcost2003 + launch_2003 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2003 = (travelcost2003 + launch_2003 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2003 = (travelcost2003 + launch_2003 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2003 = (travelcost2003 + launch_2003 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2003 = 0 if siteid == 99
-
-******************
-******2004********
-******************
-// From IL zone to IL site
-gen TC2004 = (travelcost2004 + launch_2004 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2004 = (travelcost2004 + launch_2004 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2004 = (travelcost2004 + launch_2004 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2004 = (travelcost2004 + launch_2004 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2004 = 0 if siteid == 99
-
-******************
-******2005********
-******************
-// From IL zone to IL site
-gen TC2005 = (travelcost2005 + launch_2005 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2005 = (travelcost2005 + launch_2005 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2005 = (travelcost2005 + launch_2005 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2005 = (travelcost2005 + launch_2005 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2005 = 0 if siteid == 99
-
-******************
-******2006********
-******************
-// From IL zone to IL site
-gen TC2006 = (travelcost2006 + launch_2006 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2006 = (travelcost2006 + launch_2006 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2006 = (travelcost2006 + launch_2006 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2006 = (travelcost2006 + launch_2006 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2006 = 0 if siteid == 99
-
-******************
-******2007********
-******************
-// From IL zone to IL site
-gen TC2007 = (travelcost2007 + launch_2007 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2007 = (travelcost2007 + launch_2007 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2007 = (travelcost2007 + launch_2007 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2007 = (travelcost2007 + launch_2007 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2007 = 0 if siteid == 99
-
-******************
-******2008********
-******************
-// From IL zone to IL site
-gen TC2008 = (travelcost2008 + launch_2008 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2008 = (travelcost2008 + launch_2008 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2008 = (travelcost2008 + launch_2008 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2008 = (travelcost2008 + launch_2008 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2008 = 0 if siteid == 99
-
-******************
-******2009********
-******************
-// From IL zone to IL site
-gen TC2009 = (travelcost2009 + launch_2009 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2009 = (travelcost2009 + launch_2009 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2009 = (travelcost2009 + launch_2009 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2009 = (travelcost2009 + launch_2009 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2009 = 0 if siteid == 99
-
-******************
-******2010********
-******************
-// From IL zone to IL site
-gen TC2010 = (travelcost2010 + launch_2010 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2010 = (travelcost2010 + launch_2010 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2010 = (travelcost2010 + launch_2010 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2010 = (travelcost2010 + launch_2010 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2010 = 0 if siteid == 99
-
-******************
-******2011********
-******************
-// From IL zone to IL site
-gen TC2011 = (travelcost2011 + launch_2011 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2011 = (travelcost2011 + launch_2011 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2011 = (travelcost2011 + launch_2011 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2011 = (travelcost2011 + launch_2011 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2011 = 0 if siteid == 99
-
-******************
-******2012********
-******************
-// From IL zone to IL site
-gen TC2012 = (travelcost2012 + launch_2012 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2012 = (travelcost2012 + launch_2012 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2012 = (travelcost2012 + launch_2012 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2012 = (travelcost2012 + launch_2012 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2012 = 0 if siteid == 99
-
-******************
-******2013********
-******************
-// From IL zone to IL site
-gen TC2013 = (travelcost2013 + launch_2013 + parking) if zipstate == 2 & sitestate == 2
-// From not IL zone to IL site
-replace TC2013 = (travelcost2013 + launch_2013 + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
-
-// From IN zone to IN site
-replace TC2013 = (travelcost2013 + launch_2013 + parking) if zipstate == 1 & sitestate == 1
-// From not IN zone to IN site
-replace TC2013 = (travelcost2013 + launch_2013 + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
-
-replace TC2013 = 0 if siteid == 99
+foreach year in 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 {
+    // Generate TC for the current year
+    gen TC`year' = (travelcost`year' + launch_`year' + parking) if zipstate == 2 & sitestate == 2
+    
+    // From not IL zone to IL site
+    replace TC`year' = (travelcost`year' + launch_`year' + parking + daylicense_nonres) if zipstate != 2 & sitestate == 2
+    
+    // From IN zone to IN site
+    replace TC`year' = (travelcost`year' + launch_`year' + parking) if zipstate == 1 & sitestate == 1
+    
+    // From not IN zone to IN site
+    replace TC`year' = (travelcost`year' + launch_`year' + parking + daylicense_nonres) if zipstate != 1 & sitestate == 1
+    
+    // Set TC to 0 for specific siteid
+    replace TC`year' = 0 if siteid == 99
+}
 
 
 drop boateffort_share2000 boateffort_share2001 boateffort_share2002 boateffort_share2003 boateffort_share2004 boateffort_share2005 boateffort_share2006 boateffort_share2007 boateffort_share2008 boateffort_share2009 boateffort_share2010 boateffort_share2011 boateffort_share2012 boateffort_share2013  parking daylicense_nonres launch_2002 launch_2003 launch_2006 launch_2007 launch_2008 launch_2009 launch_2010 launch_2011 launch_2012 launch_2013 parking launch daylicense_res daylicense_nonres travelcost2003 travelcost2004 travelcost2005 travelcost2006 travelcost2007 travelcost2008 travelcost2009 travelcost2010 travelcost2011 travelcost2012 travelcost2013  launch_2004 launch_2005 medhhincome2013 medhhincome2012 medhhincome2011 medhhincome2005 medhhincome2006 medhhincome2007 medhhincome2008 medhhincome2009 medhhincome2010 travelcost2002  medhhincome2002 medhhincome2003 medhhincome2004 medhhincome1999 medhhincome2000 medhhincome2001 travelcost2000 travelcost2001 launch_2000 launch_2001
