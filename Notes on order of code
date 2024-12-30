@@ -22,4 +22,35 @@ National Survey of Fishing, Hunting and Wildlife-Associated Recreation 2016
 1. Share urban/rural
 
 All years data for models.do
-I replace AllIN effort
+Import "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\ALLilininstreamseffort.xlsx", 
+sheet("Sheet1") firstrow. I generate Effort2012 as the average b/w 2011 and 2013 effort for IN sites missing 
+Effort2012. Import use "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Stata Data Sets Revised\Travel 
+costs.dta". I calculate INshare05 and INshare10 for all sites in IN. I have that data for IL and IN streams
+so don't have to do that for those. Then do some imputing... Then merge effort and tc data together. 
+Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", 
+sheet("Pop 2000") firstrow. Import  import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries 
+RUM\Fisheries RUM data.xlsx", sheet("Pop 2010") firstrow Import import excel "C:\Users\Emma\OneDrive - 
+purdue.edu\Desktop\Fisheries RUM\angler archive data\pop2011.xlsx", sheet("pop2011") firstrow. 
+Import import excel  "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\pop2012.xlsx", 
+sheet("pop2012") firstrow. Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler 
+.archive data\pop2013.xlsx", sheet("pop2013") firstrow. Next generate pop data and fill in what's missing. I 
+also exclude travel distance if site not in IL. I replace WI and MI pops. Then generate stay home data. Import 
+import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\RUCA2010zipcode.xlsx", sheet("Data") firstrow
+to get urban/rural shares. /saved as data for models .dta save "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries 
+RUM\Stata Data Sets Revised\data for models.dta", replace. Then I go through and just save what I need for each year as
+Model2000.dta, Model2001.dta, etc. 
+
+
+2. All years travel cost.do
+Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", 
+sheet("distances") firstrow. Save distances. Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries 
+RUM\angler archive data\Income1999.xlsx", sheet("Income1999") firstrow... Merge with distances. Import
+import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\Fisheries RUM data.xlsx", sheet("distances") firstrow
+save `distances'. Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\Income2011.xlsx", 
+sheet("Income2011") firstrow ... **because of lack of data available, I calculate med income assuming a linear change for years missing data**
+Import import excel  "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\Income2012.xlsx", sheet("income2012") firstrow clear
+Import import excel "C:\Users\Emma\OneDrive - purdue.edu\Desktop\Fisheries RUM\angler archive data\Income2013.xlsx", sheet("Income2013") firstrow clear
+Do travel cost calcs. Add fees data. Adjust for share boat effort. Then do per year calculations and presumably save data.
+
+
+
